@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العمليات المعدلة والمحذوفة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .main-page {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+        }
+
+        .sale-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        h2, h3 {
+            color: #333;
+        }
+
+        button {
+            margin: 20px 0;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .deleted-sales-list {
+            margin-top: 20px;
+        }
+
+        /* تنسيق اللودر */
+        .loader {
+            display: none;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* تنسيق حقل البحث */
+        .search-container {
+            margin-bottom: 20px;
+        }
+
+        .search-container input {
+            padding: 10px;
+            width: 70%;
+            font-size: 16px;
+        }
+
+        .search-container button {
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        #deleteModifiedSalesBtn, #deleteDeletedSalesBtn {
+            display: none;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.10/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="main-page">
+        <header>
+            <h1>العمليات المعدلة والمحذوفة</h1>
+            <nav>
+                <a href="index.html">العودة إلى الصفحة الرئيسية</a>
+            </nav>
+        </header>
+
+        <!-- حقل البحث -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="ابحث عن عملية..." />
+            <button id="searchBtn">بحث</button>
+        </div>
+
+        <!-- لودر احترافي -->
+        <div class="loader" id="loader"></div>
+
+        <button id="showDeletedSalesBtn">عرض العمليات المعدله و المحذوفة</button>
+        <button id="deleteModifiedSalesBtn">حذف العمليات المعدلة</button>
+        <button id="deleteDeletedSalesBtn">حذف العمليات المحذوفة</button>
+
+        <section id="modifiedSalesContainer">
+            <!-- ستظهر العمليات المعدلة هنا -->
+        </section>
+
+        <section id="deletedSalesContainer" style="display: none;">
+            <h2>قائمة العمليات المحذوفة</h2>
+            <div class="deleted-sales-list" id="deletedSalesList">
+                <!-- ستظهر العمليات المحذوفة هنا -->
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>Made By Mahmoud Hamed &copy; 2024</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // إعداد Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDfdJOe80UAwfJFZUgtmHj7TVqSAiCnnAQ",
+  authDomain: "systemcasher-33c06.firebaseapp.com",
+databaseURL: "https://systemcasher-33c06-default-rtdb.firebaseio.com",
+  projectId: "systemcasher-33c06",
+  storageBucket: "systemcasher-33c06.appspot.com",
+  messagingSenderId: "161097570896",
+  appId: "1:161097570896:web:1b587b0c4e8bac3f378f55"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        const database = firebase.database();
+        const modifiedSalesRef = database.ref('modifiedSales');
+        const deletedSalesRef = database.ref('deletedSales');
+
+        // الحصول على عنصر اللودر
+        const loader = document.getElementById('loader');
+
+        function showLoader() {
+            loader.style.display = 'block';
+        }
+
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
+        // دالة لحساب المجموع
+        function calculateTotal(items) {
+            return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+        }
+
+        // دالة لعرض العمليات المعدلة
+        function displayModifiedSales(snapshot) {
+            const container = document.getElementById('modifiedSalesContainer');
+            container.innerHTML = ''; // مسح المحتوى السابق
+
+            snapshot.forEach(childSnapshot => {
+                const saleId = childSnapshot.key;
+                const saleData = childSnapshot.val();
+
+                const originalData = saleData.originalData;
+                const updatedData = saleData.updatedData;
+
+                const saleElement = document.createElement('div');
+                saleElement.classList.add('sale-item');
+
+                // حساب الإجمالي
+                const originalTotal = calculateTotal(originalData.items);
+                const updatedTotal = updatedData ? calculateTotal(updatedData.items) : 0;
+
+                saleElement.innerHTML = `
+                    <h2>عملية بيع ${saleId}</h2>
+                    <h3>البيانات الأصلية:</h3>
+                    <p>التاريخ: ${new Date(originalData.timestamp).toLocaleString()}</p>
+                    <ul>
+                        ${originalData.items.map(item => `
+                            <li>
+                                <strong>${item.name}</strong> - السعر: ${item.price} - الكمية: ${item.quantity}
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <p><strong>الإجمالي قبل التعديل: ${originalTotal} جنيه</strong></p>
+                    
+                    <h3>بعد التعديل:</h3>
+                    ${updatedData ? `
+                        <p>التاريخ: ${new Date(updatedData.timestamp).toLocaleString()}</p>
+                        <ul>
+                            ${updatedData.items.map(item => `
+                                <li>
+                                    <strong>${item.name}</strong> - السعر: ${item.price} - الكمية: ${item.quantity}
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <p><strong>الإجمالي بعد التعديل: ${updatedTotal} جنيه</strong></p>
+                    ` : `<p>لا توجد بيانات بعد التعديل.</p>`}
+                    <hr />
+                `;
+                container.appendChild(saleElement);
+            });
+        }
+
+        // دالة لعرض العمليات المحذوفة
+        function displayDeletedSales(snapshot) {
+            const container = document.getElementById('deletedSalesList');
+            container.innerHTML = ''; // مسح المحتوى السابق
+
+            snapshot.forEach(childSnapshot => {
+                const saleId = childSnapshot.key;
+                const saleData = childSnapshot.val();
+
+                const saleElement = document.createElement('div');
+                saleElement.classList.add('sale-item');
+
+                // حساب الإجمالي
+                const totalAmount = calculateTotal(saleData.items);
+
+                saleElement.innerHTML = `
+                    <h3>عملية محذوفة ${saleId}</h3>
+                    <p>وقت الإتمام: ${new Date(saleData.completedAt).toLocaleString()}</p>
+                    <p>وقت الحذف: ${new Date(saleData.deletedAt).toLocaleString()}</p>
+                    <ul>
+                        ${saleData.items.map(item => `
+                            <li>
+                                <strong>${item.name}</strong> - السعر: ${item.price} - الكمية: ${item.quantity}
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <p><strong>الإجمالي: ${totalAmount} جنيه</strong></p>
+                    <hr />
+                `;
+                container.appendChild(saleElement);
+            });
+        }
+
+        // استدعاء الدالة لعرض العمليات المعدلة عند تحميل الصفحة
+        modifiedSalesRef.on('value', (snapshot) => {
+            displayModifiedSales(snapshot);
+        });
+
+        // حدث زر عرض العمليات المحذوفة
+        document.getElementById('showDeletedSalesBtn').addEventListener('click', () => {
+            showLoader(); // إظهار اللودر
+            const deletedSalesContainer = document.getElementById('deletedSalesContainer');
+            const modifiedSalesContainer = document.getElementById('modifiedSalesContainer');
+
+            if (deletedSalesContainer.style.display === 'none') {
+                deletedSalesRef.on('value', (snapshot) => {
+                    displayDeletedSales(snapshot);
+                    hideLoader(); // إخفاء اللودر بعد عرض البيانات
+                });
+                deletedSalesContainer.style.display = 'block';
+                modifiedSalesContainer.style.display = 'none'; // إخفاء العمليات المعدلة
+            } else {
+                deletedSalesContainer.style.display = 'none';
+                modifiedSalesContainer.style.display = 'block'; // إظهار العمليات المعدلة
+                hideLoader(); // إخفاء اللودر عند الانتقال بين القوائم
+            }
+        });
+
+        // دالة البحث عن العمليات
+        function searchSales(input, snapshot, type) {
+            const query = input.toLowerCase();
+            const results = [];
+
+            snapshot.forEach(childSnapshot => {
+                const saleId = childSnapshot.key;
+                const saleData = childSnapshot.val();
+                const items = type === 'modified' ? saleData.originalData.items : saleData.items;
+
+                const itemNames = items.map(item => item.name.toLowerCase());
+                if (saleId.toLowerCase().includes(query) || itemNames.some(name => name.includes(query))) {
+                    results.push(childSnapshot);
+                }
+            });
+
+            return results;
+        }
+
+        // حدث زر البحث
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const searchInput = document.getElementById('searchInput').value;
+            const currentSalesContainer = document.getElementById('deletedSalesContainer').style.display === 'block' ? deletedSalesRef : modifiedSalesRef;
+
+            showLoader(); // إظهار اللودر
+            currentSalesContainer.once('value', (snapshot) => {
+                const results = searchSales(searchInput, snapshot, currentSalesContainer === deletedSalesRef ? 'deleted' : 'modified');
+                if (currentSalesContainer === deletedSalesRef) {
+                    displayDeletedSales(results);
+                } else {
+                    displayModifiedSales(results);
+                }
+                hideLoader(); // إخفاء اللودر بعد البحث
+            });
+        });
+
+        // حدث زر حذف العمليات المعدلة
+        document.getElementById('deleteModifiedSalesBtn').addEventListener('click', () => {
+            if (confirm('هل أنت متأكد أنك تريد حذف جميع العمليات المعدلة؟')) {
+                showLoader(); // إظهار اللودر
+                modifiedSalesRef.remove().then(() => {
+                    alert('تم حذف جميع العمليات المعدلة بنجاح.');
+                    hideLoader(); // إخفاء اللودر
+                }).catch(error => {
+                    alert('حدث خطأ أثناء حذف العمليات المعدلة: ' + error.message);
+                    hideLoader(); // إخفاء اللودر
+                });
+            }
+        });
+
+        // حدث زر حذف العمليات المحذوفة
+        document.getElementById('deleteDeletedSalesBtn').addEventListener('click', () => {
+            if (confirm('هل أنت متأكد أنك تريد حذف جميع العمليات المحذوفة؟')) {
+                showLoader(); // إظهار اللودر
+                deletedSalesRef.remove().then(() => {
+                    alert('تم حذف جميع العمليات المحذوفة بنجاح.');
+                    hideLoader(); // إخفاء اللودر
+                }).catch(error => {
+                    alert('حدث خطأ أثناء حذف العمليات المحذوفة: ' + error.message);
+                    hideLoader(); // إخفاء اللودر
+                });
+            }
+        });
+    </script>
+</body>
+</html>

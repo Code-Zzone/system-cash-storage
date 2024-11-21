@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض العمليات المباعَة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .sale-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>عرض العمليات المباعَة</h1>
+
+    <div id="loader" style="display: none;">{ Loading... }</div>
+
+    <div id="salesDisplay"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script>
+        // إعدادات Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCPpTAJDRfFuDkq2TGCVIU_LnmYRBXTnSc",
+            authDomain: "new-protfolio.firebaseapp.com",
+            databaseURL: "https://new-protfolio-default-rtdb.firebaseio.com",
+            projectId: "new-protfolio",
+            storageBucket: "new-protfolio.appspot.com",
+            messagingSenderId: "90141039664",
+            appId: "1:90141039664:web:44d13d2f3b943f510aa1f5"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const salesRef = database.ref('sales');
+    </script>
+    <script src="../js/bills.js"></script> <!-- كود جافا سكريبت منفصل لإدارة العمليات المباعَة -->
+
+</body>
+</html>

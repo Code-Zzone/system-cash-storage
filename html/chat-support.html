@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/chat-support.css">
+    <title>صفحة المستخدم</title>
+    <!-- google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- روابط مكتبات Firebase الصحيحة -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script src="../js/chat-help.js"></script>
+</head>
+
+<body>
+    <div class="main-page">
+        <header>
+            <ul class="large-ul">
+                <li>
+                    <a href="home.html" target="_blank">الصفحة الرئيسية</a>
+                </li>
+                <li>
+                    <a href="#">تعليمات الاستخدام</a>
+                </li>
+                <li>
+                    <a href="../index.html" target="_blank">تسجيل خروج </a>
+                </li>
+            </ul>
+            <!-- phone start -->
+            <div class="main-list-phone">
+                <div class="child-list">
+                    <div class="option"></div>
+                    <div class="option ch"></div>
+                    <div class="option"></div>
+                    <ul class="small-ul">
+                        <!-- <div class="close" onclick="closeListPhone()">x</div> -->
+                        <li>
+                            <a href="home.html" target="_blank">الصفحة الرئيسية</a>
+                        </li>
+                        <li>
+                            <a href="#">تعليمات الاستخدام</a>
+                        </li>
+                        <li>
+                            <a href="../index.html" target="_blank">تسجيل خروج </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <section>
+            <div class="send-message">
+                <h1> الدعم الخاص</h1>
+                <div id="messagesContainer"></div>
+                <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا...">
+                <button onclick="sendMessage()">إرسال</button>
+                <input type="file" id="fileInput">
+                <button onclick="sendImage()">إرسال صورة</button>
+                <button onclick="startNewConversation()">بدء محادثة جديدة</button> <!-- زر بدء محادثة جديدة -->
+                <div id="confirmationMessage" style="margin-top: 20px; color: red;"></div> <!-- عنصر رسالة التأكيد -->
+            </div>
+        </section>
+        <footer>
+            <p>
+                Made By Mahmoud Hamed &copy; 2024
+                <br>
+                Phone: 01144897324
+            </p>
+        </footer>
+
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة الإدارة</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdpdxJNfgRnu35IX4IXqIT3VpM4XOzooE",
+  authDomain: "my-protfolio-88941.firebaseapp.com",
+  databaseURL: "https://my-protfolio-88941-default-rtdb.firebaseio.com",
+  projectId: "my-protfolio-88941",
+  storageBucket: "my-protfolio-88941.appspot.com",
+  messagingSenderId: "216282065194",
+  appId: "1:216282065194:web:9f81b5b3b3f6c3e78ed653"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const messagesRef = database.ref('messages');
+        const storageRef = firebase.storage().ref();
+
+        // تحميل الرسائل وعرضها
+        function loadMessages() {
+            messagesRef.on('value', (snapshot) => {
+                const messagesContainer = document.getElementById('messagesContainer');
+                messagesContainer.innerHTML = ""; // مسح الرسائل الحالية قبل التحديث
+
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    const messageItem = document.createElement('div');
+                    messageItem.classList.add('message-item');
+
+                    if (data.type === 'image') {
+                        const img = document.createElement('img');
+                        img.src = data.message;
+                        img.style.width = '100px'; // حجم الصورة
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = data.message; // رابط الصورة
+                        downloadLink.download = data.message.split('/').pop(); // اسم الملف
+                        downloadLink.innerText = 'تحميل الصورة';
+                        downloadLink.style.marginLeft = '10px';
+
+                        messageItem.innerText = `${data.sender}: `;
+                        messageItem.appendChild(img);
+                        messageItem.appendChild(downloadLink); // إضافة رابط التحميل
+                    } else {
+                        messageItem.innerText = `${data.sender}: ${data.message}`;
+                    }
+
+                    messagesContainer.appendChild(messageItem);
+                });
+            });
+        }
+
+        // إرسال رسالة
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value;
+
+            if (message.trim() === "") {
+                return; // عدم إرسال رسائل فارغة
+            }
+
+            // إرسال الرسالة إلى قاعدة البيانات
+            messagesRef.push().set({
+                message: message,
+                sender: 'الإدارة', // المرسل هو الإدارة
+                timestamp: Date.now(),
+                type: 'text'
+            });
+
+            messageInput.value = ""; // مسح حقل الإدخال بعد الإرسال
+        }
+
+        // إرسال صورة
+        function sendImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                return; // عدم إرسال ملفات فارغة
+            }
+
+            const filePath = 'images/' + file.name;
+            const uploadTask = storageRef.child(filePath).put(file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // يمكن إضافة مؤشر لتحميل الصورة إذا رغبت
+                }, 
+                (error) => {
+                    console.error("خطأ في رفع الصورة:", error);
+                }, 
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        messagesRef.push().set({
+                            message: downloadURL,
+                            sender: 'الإدارة',
+                            timestamp: Date.now(),
+                            type: 'image'
+                        });
+                    });
+                }
+            );
+
+            fileInput.value = ""; // مسح حقل الإدخال بعد الإرسال
+        }
+
+        // حذف جميع الرسائل
+        function deleteAllMessages() {
+            const confirmationMessage = document.createElement('div');
+            confirmationMessage.innerText = "هل أنت متأكد من حذف جميع الرسائل؟";
+            confirmationMessage.style.color = "red"; // لون الرسالة
+            confirmationMessage.style.margin = "10px 0";
+            confirmationMessage.style.display = "flex";
+            confirmationMessage.style.alignItems = "center";
+
+            const yesButton = document.createElement('button');
+            yesButton.innerText = "نعم";
+            yesButton.style.marginLeft = "10px";
+            yesButton.onclick = () => {
+                messagesRef.remove();
+                confirmationMessage.innerText = "تم حذف جميع الرسائل.";
+                confirmationMessage.style.color = "green"; // لون النجاح
+            };
+
+            const noButton = document.createElement('button');
+            noButton.innerText = "لا";
+            noButton.style.marginLeft = "10px";
+            noButton.onclick = () => {
+                confirmationMessage.innerText = "تم إلغاء الحذف.";
+                confirmationMessage.style.color = "orange"; // لون الإلغاء
+            };
+
+            confirmationMessage.appendChild(yesButton);
+            confirmationMessage.appendChild(noButton);
+
+            document.body.appendChild(confirmationMessage); // إضافة الرسالة إلى الصفحة
+        }
+
+        window.onload = function() {
+            loadMessages(); // تحميل الرسائل عند فتح الصفحة
+        };
+    </script>
+    <style>
+        .message-item {
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+        }
+        img {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>صفحة الإدارة</h1>
+    <div id="messagesContainer" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;"></div>
+    
+    <input type="text" id="messageInput" placeholder="اكتب رسالتك هنا..." />
+    <button onclick="sendMessage()">إرسال رسالة</button>
+    
+    <input type="file" id="fileInput" accept="image/*" />
+    <button onclick="sendImage()">إرسال صورة</button>
+
+    <button onclick="deleteAllMessages()">حذف جميع الرسائل</button>
+</body>
+</html>

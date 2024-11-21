@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض حجم البيانات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            text-align: center;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #2980b9;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+        #loader {
+            display: none;
+            margin: 20px 0;
+            font-size: 18px;
+            color: #2980b9;
+        }
+        #dataSizeDisplay {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #34495e;
+        }
+        #progressContainer {
+            width: 100%;
+            background-color: #bdc3c7;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px auto;
+            max-width: 600px;
+            height: 30px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        #progressBar {
+            height: 100%;
+            background-color: #27ae60; /* لون الشريط المستخدم */
+            width: 0;
+            transition: width 0.5s;
+        }
+        .usage-label {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            line-height: 30px; /* محاذاة العمود مع الشريط */
+        }
+        canvas {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+    <h1>حجم البيانات في قاعدة البيانات</h1>
+    <div id="loader">جارٍ تحميل البيانات...</div>
+    <div id="dataSizeDisplay"></div>
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+        <div class="usage-label" id="usageLabel">0 بايت مستخدم</div>
+    </div>
+    <canvas id="usageChart"></canvas>
+
+    <div class="footer">
+        &copy; 2024 كل الحقوق محفوظة.
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfdJOe80UAwfJFZUgtmHj7TVqSAiCnnAQ",
+            authDomain: "systemcasher-33c06.firebaseapp.com",
+            databaseURL: "https://systemcasher-33c06-default-rtdb.firebaseio.com",
+            projectId: "systemcasher-33c06",
+            storageBucket: "systemcasher-33c06.appspot.com",
+            messagingSenderId: "161097570896",
+            appId: "1:161097570896:web:1b587b0c4e8bac3f378f55"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        let usageChart; // تعريف الرسم البياني
+
+        async function displayDataSize() {
+            document.getElementById('loader').style.display = 'block'; // عرض اللودر
+            try {
+                const dbRef = ref(database);
+                const snapshot = await get(dbRef);
+                const data = snapshot.val();
+                const size = JSON.stringify(data).length;
+
+                // عرض حجم البيانات
+                document.getElementById('dataSizeDisplay').innerText = `حجم البيانات: ${size} بايت`;
+
+                // إعداد الرسم البياني
+                const maxSize = 1000000; // الحد الأقصى للحجم (1 ميجابايت)
+                const percentage = (size / maxSize) * 100;
+                document.getElementById('progressBar').style.width = percentage + '%';
+                document.getElementById('usageLabel').innerText = `${size} بايت مستخدم`;
+
+                // رسم بياني باستخدام Chart.js
+                const ctx = document.getElementById('usageChart').getContext('2d');
+                
+                if (usageChart) {
+                    usageChart.data.datasets[0].data = [size, maxSize - size];
+                    usageChart.update();
+                } else {
+                    usageChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['استخدام البيانات', 'المساحة المتبقية'],
+                            datasets: [{
+                                label: 'حجم البيانات',
+                                data: [size, maxSize - size],
+                                backgroundColor: ['#27ae60', '#e67e22'],
+                                borderWidth: 2,
+                                hoverOffset: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        font: {
+                                            size: 16,
+                                            family: 'Roboto'
+                                        }
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(tooltipItem) {
+                                            return `${tooltipItem.label}: ${tooltipItem.raw} بايت`;
+                                        }
+                                    }
+                                },
+                                datalabels: {
+                                    anchor: 'end',
+                                    align: 'end',
+                                    color: '#333',
+                                    formatter: function(value, context) {
+                                        return context.chart.data.labels[context.dataIndex] + ': ' + value + ' بايت';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
+
+                // تغيير لون الشريط إذا تجاوز الحد الأقصى
+                if (percentage > 100) {
+                    document.getElementById('progressBar').style.backgroundColor = 'red';
+                }
+            } catch (error) {
+                console.error("حدث خطأ أثناء استرجاع حجم البيانات:", error);
+                document.getElementById('dataSizeDisplay').innerText = "حدث خطأ أثناء استرجاع البيانات.";
+            } finally {
+                document.getElementById('loader').style.display = 'none'; // إخفاء اللودر
+            }
+        }
+
+        // استدعاء الدالة عند تحميل الصفحة
+        displayDataSize();
+
+        // تحديث البيانات كل 5 ثوانٍ
+        setInterval(displayDataSize, 5000);
+    </script>
+</body>
+</html>

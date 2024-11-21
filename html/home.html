@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title> الصفحه الرئيسيه</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <!-- تحميل Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode/dist/JsBarcode.all.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Changa:wght@200..800&family=Harmattan:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <!-- Usage Data -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <!-- تضمين مكتبة html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!--  مكتبه جافا سكريبت بي دي اف  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="module" src="../js/show-sales.js"></script>
+    <script type="module" src="../js/reports-js.js"></script>
+    <script type="module" src="../js/sales.js"></script>
+    <script type="module" src="../js/barcode.js"></script>
+    <script type="module" src="../js/storage.js"></script>
+    <script type="module" src="../js/time-reports.js"></script>
+    <script type="module" src="../js/canvas.-3d.js"></script>
+    <script type="module" src="../js/change-pass-name.js"></script>
+    <script type="module" src="../js/delelet-all.js"></script>
+    <script type="module" src="../js/usageDatabase.js"></script>
+</head>
+
+<body>
+    <a href="#" target="_blank"></a>
+    <div class="main-page">
+        <header>
+            <ul class="large-ul">
+                <li id="btnSupport">
+                    <a href="chat-support.html" target="_blank"><img src="../images/help.png" width="50px" alt=""> الدعم
+                        الخاص</a>
+                </li>
+                <li onclick="changePassName()" id="btnChangePassName">
+                    <a href="#">تغيير كلمه السر/الاسم</a>
+                </li>
+                <li onclick="barCode()" id="btnBarcode">
+                    <a href="#">انشاء بار كود</a>
+                </li>
+                <li>
+                    <a href="../index.html">تسجيل خروج </a>
+                </li>
+            </ul>
+            <!-- phone start -->
+            <div class="list-phone">
+                <div class="child-list">
+                    <div class="option"></div>
+                    <div class="option ch"></div>
+                    <div class="option"></div>
+                </div>
+                <ul class="small-ul">
+                    <li id="btnSupport">
+                        <a href="chat-support.html" target="_blank"><img src="../images/help.png" width="50px" alt="">
+                            الدعم الخاص</a>
+                    </li>
+                    <li onclick="changePassName()" id="btnChangePassName">
+                        <a href="#">تغيير كلمه السر/الاسم</a>
+                    </li>
+                    <li onclick="barCode()" id="btnBarcode">
+                        <a href="#">انشاء بار كود</a>
+                    </li>
+                    <li>
+                        <a href="../index.html">تسجيل خروج </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- phone end -->
+            <!-- <h1 title="يوحي بالبساطه والاناقه في البرمجه" class="logo">ZenCode </h1> -->
+        </header>
+        <div class="section-side-bar">
+            <aside>
+                <div class="list-side-bar" onclick="showSideBar()">قائمة التحكم</div>
+                <div class="side-bar">
+                    <div class="close-side-bar" onclick="closeSideBar()">X</div>
+                    <ul>
+                        <li onclick="sales()" id="btnSales">
+                            <a href="#">بيع منتجات</a>
+                        </li>
+                        <li onclick="timeReport()" id="btnReportTime">
+                            <a href="#"> تقرير محدد</a>
+                        </li>
+                        <li onclick="storage()" id="btnStorage">
+                            <a href="#">المخزن</a>
+                        </li>
+                        <li onclick="showShowSales()" id="btnShowSales">
+                            <a href="#"> تعديل العمليات </a>
+                        </li>
+                        <li onclick="fullReport()" id="btnFullReport">
+                            <a href="#">تقرير كامل</a>
+                        </li>
+                        <li onclick="deleteAll()" id="btnDeleteAll">
+                            <a href="#"> مسح البيانات</a>
+                        </li>
+                        <li onclick="addAdmin()" id="btnAddAdmin">
+                            <a href="#">اضافه مسؤل</a>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+            <!-- محتوي الصفحه -->
+            <section id="allContent">
+                <form id="changePasswordForm"></form>
+                <div id="ownerForm" class="add-owner">
+                    <h2>تواصل مع الدعم الخاص بنظامك</h2>
+                    <!-- <label for="message" style="display: none;">رسالتك:</label> -->
+                    <!-- <input type="text" id="message" name="message" style="display: none;"> -->
+                </div>
+                <div class="bar-code" id="barCode"></div>
+                <div class="sales" id="sales"></div>
+                <div class="storage" id="storage"></div>
+                <div class="time-report" id="timeReport"></div>
+                <div class="ShowSales" id="ShowSales"></div>
+                <div class="full-report" id="fullReport"></div>
+                <div id="deleteData"></div>
+                <div id="usageDatabase"></div>
+                <canvas id="networkCanvas"></canvas>
+        </div>
+        </section>
+
+    <footer>
+        <p>
+            Made By Mahmoud Hamed &copy; 2024
+            <br>
+            Phone: 01144897324
+        </p>
+    </footer>
+    </div>
+    <script src="../js/script.js"></script>
+</body>
+
+</html>

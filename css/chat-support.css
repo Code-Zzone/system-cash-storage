@@ -1,0 +1,274 @@
+:root {
+    --mainColor: beige;
+    --btnColor: #3335368b;
+    --subColor: #036dde;
+}
+* {
+    font-weight: bold;
+
+}
+/* body start */
+body {
+    /* width: 90%; */
+    /* padding: 50px; */
+    font-family: "Changa", sans-serif;
+    direction: rtl;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+}
+/* body end */
+
+/* main-page start */
+.main-page {
+    width: 100%;
+    background-color: #000;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+/* header start */
+header {  
+    width: 100%;
+background-color: #286fbb;
+border-bottom: 1px solid;
+padding: 10px;
+}
+header .large-ul {
+    width: 80%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    list-style: none;
+    
+}
+header .large-ul li {
+    color: var(--mainColor);
+    padding: 10px 20px;
+    background-color: var(--subColor);
+    transition: 1s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    width: 200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}   
+header .large-ul li a {
+    color: var(--mainColor);
+    text-decoration: none;
+    transition: padding 0.5s;
+    border-radius: 5px;
+    width: 200px; 
+}
+header .large-ul li:hover {
+    cursor: pointer;
+    background-color: #011f3f;
+}
+.large-ul li:hover a{ 
+    padding-right: 20%;
+}
+
+/* screen mobile start */
+.main-list-phone {
+    width: 90%;
+    display: none;
+    margin-right: 30px;
+
+}
+.main-list-phone .child-list {
+    width: fit-content;
+    background-color: rgba(17, 91, 141, 0.514);
+    /* background-color: var(--btnColor); */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+/* position: relative; */
+
+}
+.main-list-phone .child-list .small-ul {
+    display: none;
+    width: 100%;
+    background-color: rgba(24, 73, 165, 0.459);
+    padding: 30px;
+    list-style: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+}
+/* .main-list-phone .child-list .small-ul .close {
+    color: aliceblue;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: #286fbb;
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 5px;
+} */
+
+.main-list-phone .child-list .small-ul .close:hover .small-ul{
+    display: none !important;
+}
+.main-list-phone .child-list .small-ul::before {
+    content: "";
+    width: 0;
+    height: 0;
+    border: 10px solid ;
+    border-color: transparent transparent white transparent;
+    position: absolute;
+    top: -10px;
+}
+.main-list-phone .child-list:hover .small-ul {
+    display: block !important;
+    z-index: 1000;
+} 
+.main-list-phone .child-list .ch {
+    width: 15px !important;
+}
+.main-list-phone .child-list:hover .ch {
+    width: 30px !important;
+    transition: 0.5s;
+}
+.main-list-phone .child-list .option {
+    width: 30px;
+    height: 2px;
+    background-color: black;
+}
+.main-list-phone .child-list .small-ul li {
+    background-color: #036dde;
+    margin-top: 10px;
+    width: 150px;
+    padding: 5px 10px;
+    border-radius: 5px;
+} 
+.main-list-phone .child-list .small-ul li:hover a {
+    padding-right: 20px;
+    transition: 0.5s ;
+} 
+.main-list-phone .child-list .small-ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+@media (max-width: 1200px) {
+    .main-list-phone {
+        display: block;
+    }
+    .large-ul {
+        display: none !important;
+    }
+}
+/* screen mobile end */
+/* header end */
+/* section start */
+section {
+    width: 100%;
+    background-color: rgb(37, 111, 177);
+    padding:50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+section .send-message h1 {
+    color: #fff;
+}
+.send-message {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+    padding: 30px;
+}
+.send-message #messagesContainer {
+    border: 1px solid #19479c;
+     padding: 20px;
+      height: 300px;
+      overflow-y: scroll;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+}
+.message-item {
+    color: white;
+    background-color: #207888;
+    padding: 10px;
+    border-radius: 10px;
+}
+#messageInput {
+    background-color: white;
+}
+#messageInput {
+    color: #000;
+    font-weight: bold;
+}
+.send-message input , button {
+    border: none !important;
+    outline: none !important;
+    /* padding: 10px; */
+    cursor: pointer;
+    color: var(--mainColor);
+    padding: 10px 20px;
+    background-color: var(--subColor);
+    transition: 1s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+.send-message button:hover , #fileInput:hover {
+    cursor: pointer;
+    background-color: #011f3f;
+}
+#fileInput {
+    cursor: pointer;
+}
+.send-message #confirmationMessage {
+
+}
+/* تخصيص الشريط الخارجي */
+::-webkit-scrollbar {
+    width: 12px; /* عرض الشريط */
+    height: 12px; /* ارتفاع الشريط (للتمرير الأفقي) */
+}
+
+/* تخصيص الجزء الداخلي (المقبض) */
+::-webkit-scrollbar-thumb {
+    background-color: #0a4592; /* لون المقبض */
+    border-radius: 10px; /* زوايا مقبض دائرية */
+}
+
+/* تخصيص المقبض عند التمرير */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #0890a1; /* لون المقبض عند التحويم */
+    cursor: pointer;
+}
+
+/* تخصيص الخلفية (الشريط الفارغ) */
+::-webkit-scrollbar-track {
+    background: #f1f1f181; /* لون الخلفية */
+     border-radius: 10px;/* زوايا دائرية */
+}
+
+/* section end */
+/* footer start */
+footer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #000;
+}
+footer p {
+    color: #fff;
+}
+/* footer end */
+/* main-page end */

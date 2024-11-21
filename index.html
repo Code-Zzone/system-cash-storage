@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول</title>
+
+    <!-- تحميل Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            direction: rtl;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 420px;
+            width: 100%;
+            z-index: 1;
+            transition: transform 0.5s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 0px;
+            color: #036dde;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #036dde;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e6e9f0;
+            border-radius: 10px;
+            background-color: #f9fbfd;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #036dde;
+            box-shadow: 0 0 8px rgba(3, 109, 222, 0.2);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #036dde;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0254b5;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(3, 109, 222, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        #loginMessage {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #e74c3c;
+            text-align: center;
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #036dde;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            display: none;
+        }
+
+        #networkCanvas > canvas {
+    display: block;
+    background-color: transparent;
+    position: absolute;
+    top: 50px;
+    left: 20%;
+    transform: translatex(-20%);
+    width: 60vw;
+    z-index: 1;
+    /* transform: scale(2.5); */
+}
+
+#networkCanvas {
+    position: absolute;
+    left: 0;
+
+}
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="loginForm">
+            <h1>ZenCode</h1>
+            <div class="name">
+                <label for="loginName">اسم:</label>
+                <input type="text" value="owner" id="loginName" required>
+            </div>
+            <div class="pass">
+                <label for="loginPassword">كلمة السر:</label>
+                <input type="password" id="loginPassword" value="000" required>
+            </div>
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+
+        <p id="supportMessage" style="display:none;">
+            كلمة السر خاطئة. إذا فقدت كلمة السر يمكنك إرسال رسالة الدعم من أسفل الشاشة على مدار 24 ساعة، لا تقلق.
+        </p>
+        <div id="loginMessage" style="display: none;"></div>
+    </div>
+
+    <!-- لودر -->
+    <div class="loader" id="loader"></div>
+    <canvas id="networkCanvas"></canvas>
+    <script src="js/canvas.-3d.js"></script>
+    <script>
+        // إعداد Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDfdJOe80UAwfJFZUgtmHj7TVqSAiCnnAQ",
+  authDomain: "systemcasher-33c06.firebaseapp.com",
+databaseURL: "https://systemcasher-33c06-default-rtdb.firebaseio.com",
+  projectId: "systemcasher-33c06",
+  storageBucket: "systemcasher-33c06.appspot.com",
+  messagingSenderId: "161097570896",
+  appId: "1:161097570896:web:1b587b0c4e8bac3f378f55"
+        };
+
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // نموذج تسجيل الدخول
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const loginName = document.getElementById('loginName').value;
+            const loginPassword = document.getElementById('loginPassword').value;
+            const loader = document.getElementById('loader');
+
+            // عرض اللودر
+            loader.style.display = 'block';
+
+            // البحث عن بيانات المستخدم في قاعدة البيانات
+            database.ref('owners/').orderByChild('name').equalTo(loginName).once('value')
+                .then(snapshot => {
+                    loader.style.display = 'none'; // إخفاء اللودر بعد انتهاء العملية
+                    if (snapshot.exists()) {
+                        const userData = snapshot.val();
+                        const userKey = Object.keys(userData)[0];
+                        const user = userData[userKey];
+
+                        if (user.pass === loginPassword) {
+                            alert('تم تسجيل الدخول بنجاح!');
+                            window.location.href = 'html/home.html';
+                        } else {
+                            document.getElementById('loginMessage').innerText = 'كلمة السر خاطئة.';
+                            document.getElementById('loginMessage').style.display = 'block';
+                        }
+                    } else {
+                        document.getElementById('loginMessage').innerText = 'المستخدم غير موجود.';
+                        document.getElementById('loginMessage').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    loader.style.display = 'none'; // إخفاء اللودر في حال حدوث خطأ
+                    console.error('حدث خطأ أثناء البحث: ', error);
+                });
+        });
+    </script>
+</body>
+</html>
